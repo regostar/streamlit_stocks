@@ -1,6 +1,5 @@
 yfinance
 streamlit
-yfinance
 prophet
 streamlit-option-menu
 plotly
