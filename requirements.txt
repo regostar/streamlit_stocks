@@ -9,3 +9,4 @@ numpy
 scikit-learn
 matplotlib
 tensorflow
+python-dotenv
