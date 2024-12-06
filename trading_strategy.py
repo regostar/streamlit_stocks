@@ -42,6 +42,47 @@ def prepare_data(stock_data, n_steps=60):
 
     return np.array(X), np.array(y), scaler
 
+# def backtest_strategy(stock_data, model, scaler, n_steps=60):
+#     """Simulate a portfolio using buy/sell/hold strategy."""
+#     # Prepare the backtesting dataset
+#     scaled_data = scaler.transform(stock_data['Close'].values.reshape(-1, 1))
+#     X = []
+
+#     for i in range(n_steps, len(scaled_data)):
+#         X.append(scaled_data[i - n_steps:i, 0])
+    
+#     X = np.array(X)
+#     X = X.reshape((X.shape[0], X.shape[1], 1))
+
+#     # Initialize portfolio
+#     portfolio_value = 10000  # Starting with $10,000
+#     cash = portfolio_value
+#     shares = 0
+#     print("Data -", X)
+
+#     # Backtesting loop
+#     for i in range(len(X)):
+#         prediction = model.predict(X[i].reshape(1, X.shape[1], 1))
+#         action = np.argmax(prediction)  # 0 = Buy, 1 = Hold, 2 = Sell
+#         print("prediction ", prediction, " DATA ", X[i].reshape(1, X.shape[1], 1))
+
+#         current_price = stock_data['Close'].iloc[i + n_steps]
+
+#         if action == 0 and cash > 0:  # Buy
+#             shares = cash / current_price
+#             cash = 0
+#         elif action == 2 and shares > 0:  # Sell
+#             cash = shares * current_price
+#             shares = 0
+
+#     print("Backtesting done")
+#     # Final portfolio value
+#     final_portfolio_value = cash if shares == 0 else (shares * stock_data['Close'].iloc[-1])
+#     print("Final portfolio value", final_portfolio_value)
+    
+#     return final_portfolio_value
+
+
 def backtest_strategy(stock_data, model, scaler, n_steps=60):
     """Simulate a portfolio using buy/sell/hold strategy."""
     # Prepare the backtesting dataset
@@ -57,28 +98,37 @@ def backtest_strategy(stock_data, model, scaler, n_steps=60):
     # Initialize portfolio
     portfolio_value = 10000  # Starting with $10,000
     cash = portfolio_value
-    shares = 0
+    shares = 0  # Number of shares held, starts with 0
 
     # Backtesting loop
     for i in range(len(X)):
+        # Ensure the index doesn't go out of bounds
+        if i + n_steps >= len(stock_data):
+            break
+        
         prediction = model.predict(X[i].reshape(1, X.shape[1], 1))
+        # print("prediction ", prediction, " DATA ", X[i].reshape(1, X.shape[1], 1))
+
         action = np.argmax(prediction)  # 0 = Buy, 1 = Hold, 2 = Sell
 
-        current_price = stock_data['Close'].iloc[i + n_steps]
-
+        current_price = stock_data['Close'].iloc[i + n_steps].item()  # Get the scalar value from the Series
+        # Get the current stock price
+        print("current_price ", current_price, "type = ", type(current_price))
+        
         if action == 0 and cash > 0:  # Buy
-            shares = cash / current_price
-            cash = 0
+            shares = cash / current_price  # Buying shares
+            cash = 0  # Use all cash to buy shares
         elif action == 2 and shares > 0:  # Sell
-            cash = shares * current_price
-            shares = 0
+            cash = shares * current_price  # Sell shares and convert to cash
+            shares = 0  # No shares left
 
-    print("Backtesting done")
-    # Final portfolio value
-    final_portfolio_value = cash if shares == 0 else (shares * stock_data['Close'].iloc[-1])
+    print("cash ", cash, "shares ", shares)
+    # Final portfolio value - if shares are still held, calculate their value at the last price
+    final_portfolio_value = cash if shares == 0 else (shares * stock_data['Close'].iloc[-1].item())
     print("Final portfolio value", final_portfolio_value)
-    
+
     return final_portfolio_value
+
 
 def show_trading_strategy():
     st.title("Stock Buy/Sell/Hold Strategy Using LSTM")
