@@ -3,3 +3,10 @@ streamlit
 prophet
 streamlit-option-menu
 plotly
+openai
+pandas
+numpy
+scikit-learn
+matplotlib
+tensorflow
+python-dotenv
