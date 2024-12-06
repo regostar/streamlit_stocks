@@ -46,6 +46,26 @@ def show_forecast():
             st.write("Forecast Components")
             fig2 = model.plot_components(forecast)
             st.pyplot(fig2)
+
+            # Price Line vs Forecast Trend Line
+            fig3 = go.Figure()
+            fig3.add_trace(go.Scatter(x=df['ds'], y=df['y'], mode='lines', name='Price line', line=dict(color='teal')))
+            fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast trend line', line=dict(color='red')))
+            fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], mode='lines', name='Upper Bound', line=dict(dash='dot', color='blue')))
+            fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], mode='lines', name='Lower Bound', line=dict(dash='dot', color='blue')))
+            fig3.update_layout(title="Price Line vs Forecast Trend Line", xaxis_title="Date", yaxis_title="Price")
+            st.plotly_chart(fig3)
+
+            # Interactive Forecast Components
+            components = ['trend', 'weekly', 'yearly']
+            for component in components:
+                if component in forecast.columns:
+                    fig4 = go.Figure()
+                    fig4.add_trace(go.Scatter(x=future['ds'], y=forecast[component], mode='lines', name=component))
+                    fig4.update_layout(title=f"{component.capitalize()} Component", xaxis_title="Date", yaxis_title="Weekly Trend Effect")
+                    st.plotly_chart(fig4)
+
+
         else:
             st.error("No data found. Please check the ticker.")
     except Exception as e:
