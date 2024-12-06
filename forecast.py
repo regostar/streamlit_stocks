@@ -20,7 +20,15 @@ def show_forecast():
     try:
         stock_data = yf.download(ticker, start=start_date, end=end_date)
         if not stock_data.empty:
-            st.subheader(f"Stock Price Forecast for {ticker}")
+            # Add title with "More Details" for Stock Price Forecast
+            st.markdown(f"<h2 style='margin-bottom: 0px;'>Stock Price Forecast for {ticker}</h2>", unsafe_allow_html=True)
+            st.markdown(
+                """
+                <span style="cursor: pointer; font-size: 16px; color: blue; text-decoration: underline;" 
+                title="The graph displays historical stock price movement (solid blue line) along with a predicted future trend (light blue line), showing an overall upward trajectory with some fluctuations. The forecast suggests a continued gradual increase in the stock's value.">More Details</span>
+                """,
+                unsafe_allow_html=True
+            )
 
             # Prepare data for Prophet
             df = stock_data.reset_index()[['Date', 'Close']]
@@ -39,32 +47,52 @@ def show_forecast():
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast'))
             fig.add_trace(go.Scatter(x=df['ds'], y=df['y'], mode='lines', name='Actual'))
-
             st.plotly_chart(fig)
 
-            # Display forecast components (trend, seasonality) using Prophet's plot components
-            st.write("Forecast Components")
+            st.markdown(
+                """
+                <h3 style="display: inline;">Forecast Components</h3>
+                <span style="cursor: pointer; font-size: 16px; color: blue; text-decoration: underline;" 
+                title="The first graph shows the overall price trend over time with future predictions, while the second graph displays typical price patterns across different weekdays. The third graph illustrates how prices fluctuate throughout trading hours, with peaks during market hours and dips during off-hours.">More Details</span>
+                """, unsafe_allow_html=True)
             fig2 = model.plot_components(forecast)
             st.pyplot(fig2)
 
-            # Price Line vs Forecast Trend Line
+            st.markdown(
+                """
+                <h3 style="display: inline;">Price Line vs Forecast Trend Line</h3>
+                <span style="cursor: pointer; font-size: 16px; color: blue; text-decoration: underline;" 
+                title="The graph compares actual historical stock prices (teal line) against predicted future values (red line), with blue dotted lines showing potential upper and lower price ranges. The forecast components break down the stock's behavior patterns across weekly trading days and daily trading hours.">More Details</span>
+                """, unsafe_allow_html=True)
             fig3 = go.Figure()
             fig3.add_trace(go.Scatter(x=df['ds'], y=df['y'], mode='lines', name='Price line', line=dict(color='teal')))
             fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast trend line', line=dict(color='red')))
             fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], mode='lines', name='Upper Bound', line=dict(dash='dot', color='blue')))
             fig3.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], mode='lines', name='Lower Bound', line=dict(dash='dot', color='blue')))
-            fig3.update_layout(title="Price Line vs Forecast Trend Line", xaxis_title="Date", yaxis_title="Price")
+            fig3.update_layout(xaxis_title="Date", yaxis_title="Price", margin={"t": 10, "b": 10})  
             st.plotly_chart(fig3)
 
-            # Interactive Forecast Components
-            components = ['trend', 'weekly', 'yearly']
-            for component in components:
-                if component in forecast.columns:
-                    fig4 = go.Figure()
-                    fig4.add_trace(go.Scatter(x=future['ds'], y=forecast[component], mode='lines', name=component))
-                    fig4.update_layout(title=f"{component.capitalize()} Component", xaxis_title="Date", yaxis_title="Weekly Trend Effect")
-                    st.plotly_chart(fig4)
+            st.markdown(
+                """
+                <h3 style="display: inline;">Trend Component</h3>
+                <span style="cursor: pointer; font-size: 16px; color: blue; text-decoration: underline;" 
+                title="The trend component graph shows the overall long-term direction of the stock price, removing daily and weekly fluctuations.">More Details</span>
+                """, unsafe_allow_html=True)
+            fig4 = go.Figure()
+            fig4.add_trace(go.Scatter(x=future['ds'], y=forecast['trend'], mode='lines', name="Trend"))
+            fig4.update_layout(xaxis_title="Date", yaxis_title="Trend Effect", margin={"t": 10, "b": 10})  
+            st.plotly_chart(fig4)
 
+            st.markdown(
+                """
+                <h3 style="display: inline;">Weekly Component</h3>
+                <span style="cursor: pointer; font-size: 16px; color: blue; text-decoration: underline;" 
+                title="The weekly component graph shows how stock prices typically fluctuate across different days of the week, displayed as vertical bars that represent whether prices tend to be higher or lower on specific weekdays. These recurring weekly patterns help understand regular price movements that happen during a typical trading week.">More Details</span>
+                """, unsafe_allow_html=True)
+            fig5 = go.Figure()
+            fig5.add_trace(go.Scatter(x=future['ds'], y=forecast['weekly'], mode='lines', name="Weekly"))
+            fig5.update_layout(xaxis_title="Date", yaxis_title="Weekly Trend Effect", margin={"t": 10, "b": 10})  
+            st.plotly_chart(fig5)
 
         else:
             st.error("No data found. Please check the ticker.")
