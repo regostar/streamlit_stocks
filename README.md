@@ -8,6 +8,14 @@ Clairvoyant v2.0 is a Streamlit-based web application for viewing and forecastin
 - **Interactive Interface**: User-friendly sidebar for easy stock ticker selection, date range inputs, and forecast period adjustments.
 - **Customization Options**: Offers flexibility for users to choose forecast periods, making it suitable for both short- and long-term stock analysis.
 
+## 🛠️ Tech Stack
+Core Framework
+Python 3.11+ · Streamlit, LSTM Model
+
+## Data & AI
+yfinance · pandas · Prophet
+
+
 ## Demo
 Below is a demonstration of the Clairvoyant v2.0 application in action:
 
